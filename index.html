@@ -1,859 +1,234 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>LunAI</title>
-<style>
-:root{--bg:#0e1020;--panel:#151932;--panel2:#1b2040;--line:#2a3058;--text:#e9e7f7;--dim:#9a9cc4;--accent:#8f97ff;--glow:#f3c978;--bad:#ff7a8a;--ok:#7be0b0}
-*{box-sizing:border-box}html,body{height:100%;margin:0}
-:root{--onaccent:#10122a;--stars:radial-gradient(1px 1px at 20px 30px,#fff9,transparent),radial-gradient(1.5px 1.5px at 90px 80px,#fff7,transparent),radial-gradient(1px 1px at 160px 20px,#fff8,transparent),radial-gradient(1px 1px at 60px 140px,#fff6,transparent),radial-gradient(1.2px 1.2px at 130px 120px,#fff7,transparent)}
-body,header,aside,section,.msg,button,#code,#prompt,.card,.tab{transition:background-color .7s,color .7s,border-color .7s}
-header,#filesPane,#chatPane,.tabs{background-image:var(--stars);background-size:200px 180px}
-.moon{width:20px;height:20px;border-radius:50%;background:var(--glow);box-shadow:inset -7px -2px 0 0 var(--panel),0 0 16px var(--glow);display:inline-block}
-body{background:var(--bg);color:var(--text);font:14px/1.5 "Segoe UI",system-ui,sans-serif;display:flex;flex-direction:column}
-header{display:flex;align-items:center;gap:12px;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
-.logo{font-weight:700;font-size:16px;letter-spacing:.3px;display:flex;align-items:center;gap:9px}
-#status{color:var(--dim);font-size:12px;flex:1}#status.err{color:var(--bad)}
-button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 10px;cursor:pointer;font:inherit}
-button:hover{border-color:var(--accent)}button:focus-visible,textarea:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
-button.primary{background:var(--accent);color:var(--onaccent);border-color:var(--accent);font-weight:600}button:disabled{opacity:.5;cursor:default}
-#modelSel,#projSel{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:5px 8px;font:inherit}
-.ib{padding:4px 8px}#projSel{max-width:220px;font-weight:600}
-.att{display:inline-flex;gap:6px;align-items:center;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:2px 4px 2px 8px;font-size:12px}.att img{width:22px;height:22px;object-fit:cover;border-radius:4px}.att button{border:0;background:none;padding:0 5px}
-.msg img.th{max-width:140px;max-height:100px;border-radius:6px;margin:4px 4px 0 0}#attach{padding:6px 9px}
-main{flex:1;display:grid;grid-template-columns:210px 1fr 380px;min-height:0}
-aside,section{min-height:0;display:flex;flex-direction:column}
-#filesPane{background:var(--panel);border-right:1px solid var(--line)}
-.ph{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;color:var(--dim);font-size:12px}
-#files{overflow:auto;flex:1;padding:0 6px 8px}
-.f{display:flex;align-items:center;border-radius:6px}.f:hover{background:var(--panel2)}.f.on{background:var(--panel2);box-shadow:inset 2px 0 var(--glow)}
-.f button{flex:1;text-align:left;background:none;border:0;padding:5px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.f .x{flex:0;opacity:0;padding:2px 7px}.f:hover .x{opacity:1}
-.empty{color:var(--dim);padding:10px;font-size:13px}
-#center{border-right:1px solid var(--line)}
-.tabs{display:flex;gap:2px;padding:6px 10px 0;background:var(--panel)}
-.tab{border-radius:6px 6px 0 0;border-bottom:0;background:none;border-color:transparent}.tab.on{background:var(--bg);border-color:var(--line)}
-#pathbar{padding:6px 12px;font-size:12px;color:var(--dim);display:flex;gap:10px;align-items:center}
-#lang{color:var(--glow)}
-#code{flex:1;width:100%;resize:none;border:0;background:var(--bg);color:var(--text);font:13px/1.55 "Cascadia Code",Consolas,Menlo,monospace;padding:10px 14px;tab-size:2;white-space:pre;overflow:auto}
-#preview{flex:1;border:0;background:#fff;width:100%}
-.view{display:none;flex:1;min-height:0;flex-direction:column}.view.on{display:flex}
-#chatPane{background:var(--panel)}
-#chat{flex:1;overflow:auto;padding:10px}
-.msg{margin:0 0 12px;padding:9px 11px;border-radius:10px;background:var(--bg);border:1px solid var(--line);word-wrap:break-word;overflow-wrap:anywhere}
-.msg.user{background:var(--panel2);border-left:3px solid var(--accent);margin-left:24px}.msg .who{font-size:11px;color:var(--dim);margin-bottom:2px}
-.msg pre{background:var(--panel2);padding:8px;border-radius:6px;overflow:auto;font:12px/1.5 Consolas,monospace}
-.msg code{background:var(--panel2);padding:1px 4px;border-radius:4px;font-family:Consolas,monospace;font-size:12px}.msg pre code{padding:0}
-.tn{font-size:12px;color:var(--ok);margin-top:3px;word-break:break-word}.tn.bad{color:var(--bad)}.dim{color:var(--dim)}
-.plan{font-size:12px;margin:2px 0 6px;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--panel)}.plan .d{color:var(--dim);text-decoration:line-through}.plan .p{color:var(--glow)}
-.chips{display:flex;flex-wrap:wrap;gap:6px;padding:0 10px 8px}.chip{font-size:12px;border-radius:14px;padding:3px 10px}
-#composer{padding:8px 10px;border-top:1px solid var(--line);display:flex;gap:8px;align-items:flex-end}
-#prompt{flex:1;resize:none;background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit;max-height:180px}
-#settings{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center}#settings.on{display:flex}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;width:min(420px,92vw);display:flex;flex-direction:column;gap:10px}
-.card input,.card select{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:6px;padding:7px}
-[hidden]{display:none!important}
-#center{position:relative}
-#welcome{position:absolute;inset:74px 0 0 0;z-index:3;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;text-align:center;padding:20px}
-#welcome h2{margin:0;font-size:24px}#welcome p{color:var(--dim);margin:0 0 14px}
-.starters{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;max-width:520px}.starters button{padding:10px 16px;font-size:14px;border-radius:10px}
-#perr{background:#4a1d28;color:#ffd7de;padding:6px 12px;font-size:12px;display:flex;gap:10px;align-items:center}#perr span{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-#pathbar button{padding:2px 9px;font-size:12px}
-#mnav{display:none}
-@media(max-width:900px){
-  main{grid-template-columns:1fr}main>*{display:none!important}
-  main[data-m=chat] #chatPane,main[data-m=files] #filesPane,main[data-m=code] #center,main[data-m=run] #center{display:flex!important}
-  #mnav{display:flex;background:var(--panel);border-top:1px solid var(--line)}#mnav button{flex:1;border:0;border-radius:0;padding:12px 4px;background:none}#mnav button.on{color:var(--glow);box-shadow:inset 0 2px var(--glow)}
-  header #download,header #newChat{display:none}
-  header{flex-wrap:wrap}#projSel,#modelSel{max-width:42vw}
-}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LunAI Chatbot</title>
+    <!-- Tailwind CSS for clean layout -->
+    <script src="https://jsdelivr.net"></script>
+    <!-- Marked.js to support Markdown formatting -->
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        /* Custom scrollbar and markdown styling tweaks */
+        .prose p { margin-bottom: 0.75rem; }
+        .prose p:last-child { margin-bottom: 0; }
+        .prose ul, .prose ol { margin-left: 1.25rem; margin-bottom: 0.75rem; list-style-type: disc; }
+        .prose code { background-color: rgba(0,0,0,0.05); padding: 0.125rem 0.25rem; border-radius: 0.25rem; font-family: monospace; }
+        .prose pre { background-color: #1f2937; color: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; margin-top: 0.5rem; margin-bottom: 0.5rem; }
+        .prose pre code { background-color: transparent; color: inherit; padding: 0; }
+    </style>
 </head>
-<body>
-<header>
-  <div class="logo"><span class="moon"></span> LunAI</div>
-  <select id="projSel" aria-label="Project"></select>
-  <button id="projNew" class="ib" title="New project" aria-label="New project">＋</button>
-  <button id="projRename" class="ib" title="Rename project" aria-label="Rename project">✎</button>
-  <button id="projDel" class="ib" title="Delete project" aria-label="Delete project">🗑</button>
-  <div id="status"></div>
-  <button id="undo" hidden>Undo AI edits</button>
-  <button id="download">Export .json</button>
-  <button id="newChat">New chat</button>
-  <select id="modelSel" aria-label="Model"></select>
-</header>
-<main>
-  <aside id="filesPane">
-    <div class="ph"><span>Files</span><button id="newFile">+ New</button></div>
-    <div id="files"></div>
-  </aside>
-  <section id="center">
-    <div class="tabs">
-      <button class="tab on" data-view="codeView">Code</button>
-      <button class="tab" data-view="previewView">▶ Run</button>
-    </div>
-    <div id="pathbar"><span id="path">No file open</span><span id="lang"></span><span style="flex:1"></span><button id="reload" hidden>↻ Reload</button><button id="full" hidden>⤢ Full screen</button></div>
-    <div id="welcome">
-      <h2>What do you want to build?</h2>
-      <p>Describe it in the chat on the right, or start with one of these.</p>
-      <div class="starters">
-        <button data-send="Make a Flappy Bird clone I can play in the browser">🐦 Flappy Bird</button>
-        <button data-send="Build a snake game with a score and restart button">🐍 Snake game</button>
-        <button data-send="Build a todo app that saves tasks in the browser">✅ Todo app</button>
-        <button data-send="Make a clean personal portfolio website">🌐 Portfolio site</button>
-        <button data-send="Build a calculator app">🧮 Calculator</button>
-        <button data-send="Write a Python script that renames all files in a folder by date">🐍 Python script</button>
-      </div>
-    </div>
-    <div id="perr" hidden><span id="perrmsg"></span><button id="fixerr">Ask Luna to fix</button></div>
-    <div class="view on" id="codeView"><textarea id="code" spellcheck="false" placeholder="Open or create a file, or ask Luna to build something."></textarea></div>
-    <div class="view" id="previewView"><iframe id="preview" sandbox="allow-scripts allow-modals"></iframe></div>
-  </section>
-  <aside id="chatPane">
-    <div id="chat"></div>
-    <div class="chips" id="chips"></div>
-    <div id="pending" class="chips"></div>
-    <input type="file" id="fileIn" multiple hidden>
-    <div id="composer">
-      <textarea id="prompt" rows="1" placeholder="Ask Luna to build, fix or explain code (Ctrl+Enter to send)"></textarea>
-      <button id="attach" title="Attach files or images (or drop / paste)" aria-label="Attach files or images">📎</button>
-      <button class="primary" id="send">Send</button>
-      <button id="stop" hidden>Stop</button>
-    </div>
-  </aside>
-</main>
-<nav id="mnav"><button data-m="chat" class="on">💬 Chat</button><button data-m="files">📁 Files</button><button data-m="code">✎ Code</button><button data-m="run">▶ Run</button></nav>
-<script>
-// Model config (same setup as ai.html): name, provider type, endpoint, key, model id
-const MISTRAL_URL = "https://api.mistral.ai/v1/chat/completions?login.live.com";
-const MISTRAL_KEY = "SwaoRwo7I19YkbmP6Pw7vJ2IWDat8yxf";
-const MODELS = [
-  { name:"Codestral",        type:"mistral", url:MISTRAL_URL, key:MISTRAL_KEY, id:"codestral-latest" },
-  { name:"Mistral Large",    type:"mistral", url:MISTRAL_URL, key:MISTRAL_KEY, id:"mistral-large-latest" },
-  { name:"Ministral",        type:"mistral", url:MISTRAL_URL, key:MISTRAL_KEY, id:"ministral-8b-latest" },
-  { name:"Gemini 3.5 Flash", type:"gemini",  url:"https://ai.celestrium-online.workers.dev?login.live.com", key:"", id:"" }
-];
-const LANGS = {js:"JavaScript",mjs:"JavaScript",ts:"TypeScript",tsx:"TypeScript React",jsx:"React JSX",py:"Python",html:"HTML",css:"CSS",json:"JSON",md:"Markdown",java:"Java",kt:"Kotlin",c:"C",h:"C header",cpp:"C++",cc:"C++",cs:"C#",go:"Go",rs:"Rust",rb:"Ruby",php:"PHP",swift:"Swift",sh:"Shell",bash:"Shell",sql:"SQL",lua:"Lua",dart:"Dart",r:"R",pl:"Perl",scala:"Scala",hs:"Haskell",ex:"Elixir",zig:"Zig",yml:"YAML",yaml:"YAML",toml:"TOML",xml:"XML",svg:"SVG",vue:"Vue",svelte:"Svelte",txt:"Text"};
-const langOf = p => { const m = /\.([A-Za-z0-9]+)$/.exec(p || ""); return (m && LANGS[m[1].toLowerCase()]) || (/(^|\/)Dockerfile$/.test(p||"") ? "Dockerfile" : (/(^|\/)Makefile$/.test(p||"") ? "Makefile" : "Text")); };
+<body class="bg-gray-100 h-screen flex flex-col font-sans">
 
-const SYSTEM = `You are Luna, an autonomous coding agent inside LunAI, a browser-based workspace. You work in ANY programming language or format. Use the language the user asks for, else the one already in the workspace, else the most suitable one (say why in one line).
+    <!-- Header -->
+    <header class="bg-indigo-600 text-white p-4 shadow-md flex justify-between items-center">
+        <h1 class="text-xl font-bold tracking-wide">🌙 LunAI</h1>
+        <button id="clearBtn" class="bg-indigo-700 hover:bg-indigo-800 text-sm px-3 py-1.5 rounded transition-colors shadow">
+            Clear History
+        </button>
+    </header>
 
-You work in a loop until the job is truly done:
-1. UNDERSTAND: read the request. Inspect the workspace first (list_files, read_file, search_files) before changing anything. For any task with more than two steps, call update_plan with a markdown checklist ("- [ ] step", "- [>] in progress", "- [x] done") and keep it current.
-2. ACT: make changes with write_file, edit_file, rename_file and delete_file. Prefer small, correct edits to existing code. Write complete, working, idiomatic code with sensible structure. No placeholders or TODOs.
-3. OBSERVE: run it. Use run_code (JavaScript, HTML pages and Python really run in this browser), run_tests and check_project. Read the actual output, errors and logs.
-4. ADJUST: if anything fails, find the root cause from the evidence, fix it, and run again. Never repeat a failing action unchanged and never guess blindly. Add tests for non-trivial logic (JavaScript: name.test.js using test, describe, expect, assert; Python: test_name.py using unittest) and make them pass.
-Finish only when verification passes, or explain precisely what blocks you. Never claim something works unless you saw it pass.
+    <!-- Chat Area -->
+    <main id="chatWindow" class="flex-1 overflow-y-auto p-4 space-y-4 max-w-4xl w-full mx-auto">
+        <!-- Messages will get rendered dynamically here -->
+    </main>
 
-Rules:
-- You DO have tools and must use them. Never say you cannot create files, and never answer with only tips. If a tool call is ever unavailable, reply with each file in a fenced code block with its path on the line directly above the fence.
-- Web projects must work by opening index.html: link local css/js with relative paths, and use only CDN scripts if a library is needed.
-- Other languages (Rust, Go, Java, C++ and so on) cannot run in this browser: write them carefully, re-read them, use check_project, and give the user the exact command to run them locally.
-- When a project has a clear mood or subject, call set_theme once with matching hex colors (bg is the dark or light base, accent is the main color, glow is a secondary highlight).
-- Files the user attaches are already in the workspace. Attached images are shown to you directly.
-- Keep chat replies short: what you did, what you verified, how to run it, and one next step. Reply in the language the user writes in.`;
+    <!-- Input Footer -->
+    <footer class="bg-white border-t border-gray-200 p-4 sticky bottom-0">
+        <form id="chatForm" class="max-w-4xl w-full mx-auto flex gap-3">
+            <input 
+                type="text" 
+                id="userInput" 
+                placeholder="Ask LunAI anything..." 
+                required 
+                class="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+            <button 
+                type="submit" 
+                id="sendBtn"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium px-6 py-2.5 rounded-lg transition-colors shadow flex items-center justify-center min-w-[80px]"
+            >
+                Send
+            </button>
+        </form>
+    </footer>
 
-const TOOLS = [
-  fn("list_files","List every file in the workspace with its size.",{}),
-  fn("read_file","Read a file's content. Optionally pass start and end line numbers to read just a range.",{path:{type:"string"},start:{type:"integer"},end:{type:"integer"}},["path"]),
-  fn("write_file","Create a file or fully replace its content.",{path:{type:"string"},content:{type:"string"}},["path","content"]),
-  fn("edit_file","Replace one exact occurrence of text in a file.",{path:{type:"string"},find:{type:"string"},replace:{type:"string"}},["path","find","replace"]),
-  fn("rename_file","Rename or move a file.",{path:{type:"string"},new_path:{type:"string"}},["path","new_path"]),
-  fn("delete_file","Delete a file.",{path:{type:"string"}},["path"]),
-  fn("set_theme","Re-color the LunAI interface to match the project mood. Colors are 6-digit hex like #0e1020.",{name:{type:"string"},bg:{type:"string"},accent:{type:"string"},glow:{type:"string"}},["bg","accent"]),
-  fn("search_files","Find text across all workspace files. Returns path:line: text.",{query:{type:"string"}},["query"]),
-  fn("check_project","Self-check the workspace: syntax, brackets, missing file references, missing HTML ids, placeholders, and runtime errors when the page is run. Call after writing code.",{}),
-  fn("run_code","Run a file and return its console output and errors. JavaScript (.js, with CommonJS require() between workspace files), HTML pages (console logs and runtime errors) and Python (.py) really run in this browser. Test files run with their test harness.",{path:{type:"string"}},["path"]),
-  fn("run_tests","Run every test file in the workspace (name.test.js, test.js, test_name.py) and return pass or fail details.",{}),
-  fn("update_plan","Record or update your task plan as a markdown checklist: '- [ ] todo', '- [>] in progress', '- [x] done'.",{plan:{type:"string"}},["plan"])
-];
-function fn(name, description, properties, required = []) {
-  return { type: "function", function: { name, description, parameters: { type: "object", properties, required } } };
-}
+    <script>
+        // CONFIGURATION
+        const API_KEY = "SwaoRwo7I19YkbmP6Pw7vJ2IWDat8yxf";
+        const API_URL = "https://api.mistral.ai/v1/chat/completions";
+        const MODEL_NAME = "mistral-large-latest"; // Mistral's smartest tier model
 
-const KEY = "lunai.v2";
-let saved = {}; try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch {}
-const state = Object.assign({ files: {}, messages: [], activePath: "", modelIdx: 0, theme: "moon" }, saved);
-if (!MODELS[state.modelIdx]) state.modelIdx = 0;
-const uid = () => Math.random().toString(36).slice(2, 9);
-if (!Array.isArray(state.projects) || !state.projects.length) { const id = uid(); state.projects = [{ id, name: "My project", files: state.files || {}, messages: state.messages || [], activePath: state.activePath || "" }]; state.currentId = id; }
-if (!state.projects.find(x => x.id === state.currentId)) state.currentId = state.projects[0].id;
-{ const c = state.projects.find(x => x.id === state.currentId); state.files = c.files || {}; state.messages = c.messages || []; state.activePath = c.activePath || ""; }
-let stopped = false, curLive = null, visionTurn = false, busy = false, abort = null, saveTimer = null, snapshot = null;
-const $ = id => document.getElementById(id);
-const els = { files:$("files"), chat:$("chat"), prompt:$("prompt"), send:$("send"), stop:$("stop"), code:$("code"), pathbar:$("path"), lang:$("lang"), modelSel:$("modelSel"), chips:$("chips"), preview:$("preview"), undo:$("undo") };
+        // DOM ELEMENTS
+        const chatWindow = document.getElementById('chatWindow');
+        const chatForm = document.getElementById('chatForm');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const clearBtn = document.getElementById('clearBtn');
 
-const THEMES = {
-  moon:{bg:"#0e1020",panel:"#151932",panel2:"#1b2040",line:"#2a3058",text:"#e9e7f7",dim:"#9a9cc4",accent:"#8f97ff",glow:"#f3c978"},
-  ocean:{bg:"#07161f",panel:"#0c2230",panel2:"#10303f",line:"#1d4a5e",text:"#e3f6fb",dim:"#85b4c4",accent:"#3fc1e0",glow:"#9ff0e0"},
-  forest:{bg:"#0b1a12",panel:"#11271a",panel2:"#173522",line:"#27553a",text:"#e6f4e8",dim:"#8fb59a",accent:"#5fd08a",glow:"#d8e58a"},
-  sunset:{bg:"#1c0f1c",panel:"#2a1626",panel2:"#381d30",line:"#5a2f48",text:"#fdeee6",dim:"#c99aa8",accent:"#ff8a5c",glow:"#ffc96b"},
-  neon:{bg:"#08060f",panel:"#110c22",panel2:"#1a1235",line:"#3a1f6e",text:"#f1e9ff",dim:"#a58fd6",accent:"#ff3df2",glow:"#2ff3ff"},
-  fire:{bg:"#170908",panel:"#251110",panel2:"#331715",line:"#5e2a22",text:"#ffece4",dim:"#c99a8c",accent:"#ff5a36",glow:"#ffb84a"},
-  candy:{bg:"#1a1024",panel:"#26173a",panel2:"#321f4b",line:"#5a3a85",text:"#fff0fb",dim:"#cfa3d9",accent:"#ff7ad9",glow:"#7af0ff"},
-  snow:{bg:"#eef2fa",panel:"#ffffff",panel2:"#e4eaf6",line:"#c9d3e8",text:"#1c2340",dim:"#5d688c",accent:"#4a5cf0",glow:"#d98a00"},
-  terminal:{bg:"#050805",panel:"#0a110a",panel2:"#101a10",line:"#1f3a1f",text:"#c9f5c9",dim:"#6fae6f",accent:"#37e05a",glow:"#b6ff6b"},
-  desert:{bg:"#1d1509",panel:"#2b2010",panel2:"#3a2c16",line:"#5f4a26",text:"#f8ecd3",dim:"#c2a979",accent:"#e8a64a",glow:"#ff7e4a"}
-};
-const THEME_WORDS = [
-  ["ocean", /\b(ocean|sea|beach|aqua|marine|fish|surf|waves?|underwater|diving)\b/i],
-  ["forest", /\b(forest|nature|trees?|plants?|garden|jungle|eco|leaf|leaves|hiking)\b/i],
-  ["sunset", /\b(sunset|sunrise|golden hour|romantic|travel|wedding)\b/i],
-  ["neon", /\b(neon|cyberpunk|synthwave|vaporwave|arcade|games?|gaming|futuristic)\b/i],
-  ["fire", /\b(fire|lava|volcano|dragon|spicy|bbq|grill)\b/i],
-  ["candy", /\b(candy|cute|pink|kawaii|kids?|bakery|cake|toys?|unicorn|baby)\b/i],
-  ["snow", /\b(snow|winter|ice|minimal|minimalist|light mode|white|paper|notes?)\b/i],
-  ["terminal", /\b(terminal|hacker|matrix|shell|cli|command line|console)\b/i],
-  ["desert", /\b(desert|sand|western|egypt|pyramids?|coffee|cafe|vintage|retro)\b/i],
-  ["moon", /\b(moon|night|space|stars?|galaxy|cosmos|astronomy|dark mode|planets?|lunar)\b/i]
-];
-function detectTheme(text) { for (const [n, re] of THEME_WORDS) if (re.test(text)) return n; return null; }
-const isHex = h => /^#[0-9a-f]{6}$/i.test(h || "");
-const rgb = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
-const lum = h => { const [r, g, b] = rgb(h); return r * .3 + g * .59 + b * .11; };
-function mix(a, b, t) { const x = rgb(a), y = rgb(b); return "#" + x.map((v, i) => Math.round(v + (y[i] - v) * t).toString(16).padStart(2, "0")).join(""); }
-function customTheme(a) {
-  if (!isHex(a.bg) || !isHex(a.accent)) return null;
-  const text = lum(a.bg) > 140 ? "#1c2340" : "#eeeef8";
-  return { bg:a.bg, panel:mix(a.bg, text, .07), panel2:mix(a.bg, text, .13), line:mix(a.bg, text, .22), text, dim:mix(text, a.bg, .42), accent:a.accent, glow:isHex(a.glow) ? a.glow : a.accent };
-}
-function applyTheme(t) {
-  const th = typeof t === "string" ? THEMES[t] : t;
-  if (!th) return false;
-  const r = document.documentElement.style;
-  for (const k in th) r.setProperty("--" + k, th[k]);
-  r.setProperty("--onaccent", lum(th.accent) > 150 ? "#10122a" : "#ffffff");
-  state.theme = t; save();
-  return true;
-}
+        // Core Conversation State (Loaded from LocalStorage if it exists)
+        let conversationHistory = JSON.parse(localStorage.getItem('lunai_history')) || [
+            { role: "system", content: "You are LunAI, a helpful, intelligent AI assistant powered by Mistral AI." }
+        ];
 
-function syncCurrent() { const p = state.projects.find(x => x.id === state.currentId); if (p) { p.files = state.files; p.messages = state.messages.filter(m => m.role !== "tool").map(({ imgs, ...r }) => r); p.activePath = state.activePath; p.updated = Date.now(); } }
-function save() { try { syncCurrent(); localStorage.setItem(KEY, JSON.stringify({ projects: state.projects, currentId: state.currentId, modelIdx: state.modelIdx, theme: state.theme })); } catch {} }
-function setStatus(t, bad) { $("status").textContent = t; $("status").className = bad ? "err" : ""; }
-const escapeHtml = s => String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
-const normPath = p => String(p || "").trim().replace(/\\/g, "/").replace(/^\.?\//, "");
+        // Initialize view
+        renderHistory();
 
-function md(text) {
-  const parts = String(text || "").split(/```/);
-  return parts.map((p, i) => {
-    if (i % 2) { const nl = p.indexOf("\n"); return "<pre><code>" + escapeHtml(nl >= 0 ? p.slice(nl + 1) : p) + "</code></pre>"; }
-    return escapeHtml(p).replace(/`([^`\n]+)`/g, "<code>$1</code>").replace(/\*\*([^*\n]+)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
-  }).join("");
-}
+        // Handle sending a message
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const text = userInput.value.trim();
+            if (!text) return;
 
-function renderFiles() {
-  const paths = Object.keys(state.files).sort();
-  $("welcome").hidden = paths.length > 0;
-  els.files.innerHTML = paths.length ? paths.map(p => `<div class="f ${p === state.activePath ? "on" : ""}"><button data-path="${escapeHtml(p)}" title="${escapeHtml(p)}">${escapeHtml(p)}</button><button class="x" data-del="${escapeHtml(p)}" aria-label="Delete ${escapeHtml(p)}">×</button></div>`).join("") : '<div class="empty">No files yet. Ask Luna to build something.</div>';
-}
-function renderChat() {
-  const msgs = state.messages.filter(m => m.role === "user" || m.role === "assistant");
-  els.chat.innerHTML = msgs.length ? msgs.map(m => `<div class="msg ${m.role}"><div class="who">${m.role === "user" ? "You" : "Luna"}</div>${(m.imgs || []).map(u => `<img class="th" src="${u}" alt="attached image">`).join("")}${m.plan ? planHtml(m.plan) : ""}${(m.toolNotes || []).map(n => `<div class="tn${/^✗/.test(n) ? " bad" : ""}">${/^(✓|✗|💭)/.test(n) ? "" : "✓ "}${n}</div>`).join("")}${md(m.content) || (busy ? "…" : "")}</div>`).join("") : '<div class="empty">Hi, I\'m Luna. Tell me what to build and I\'ll write it, run it and check it. I work in any language.</div>';
-  els.chat.scrollTop = els.chat.scrollHeight;
-  renderChips();
-  els.undo.hidden = !snapshot || snapshot === JSON.stringify(state.files);
-}
-function renderChips() {
-  const p = state.activePath;
-  const list = p ? ["Explain this file", "Find and fix bugs", "Add tests for " + p.split("/").pop(), "Refactor for readability"] : ["Build a todo app in HTML/CSS/JS", "Python CLI that renames files", "Rust hello world with Cargo", "Go REST API with one endpoint"];
-  els.chips.innerHTML = busy ? "" : list.map(t => `<button class="chip">${escapeHtml(t)}</button>`).join("");
-}
+            // 1. Append user message to state & UI
+            appendMessage("user", text);
+            userInput.value = '';
+            
+            // 2. Add loading state UI
+            const loadingId = appendLoadingBubble();
+            setFormDisabled(true);
 
-function openFile(path) {
-  if (!(path in state.files)) return;
-  state.activePath = path;
-  els.code.value = state.files[path];
-  els.pathbar.textContent = path;
-  els.lang.textContent = langOf(path);
-  renderFiles(); renderChips(); save();
-  if ($("previewView").classList.contains("on")) renderPreview();
-}
-function closeEditorIfMissing() {
-  if (state.activePath && !(state.activePath in state.files)) {
-    const next = Object.keys(state.files).sort()[0];
-    if (next) return openFile(next);
-    state.activePath = ""; els.code.value = ""; els.pathbar.textContent = "No file open"; els.lang.textContent = "";
-  }
-}
-function showView(id) {
-  document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === id));
-  document.querySelectorAll(".tab").forEach(t => t.classList.toggle("on", t.dataset.view === id));
-  $("reload").hidden = $("full").hidden = id !== "previewView";
-  if (id === "previewView") renderPreview();
-}
+            try {
+                // 3. Request completion from Mistral API
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${API_KEY}`
+                    },
+                    body: JSON.stringify({
+                        model: MODEL_NAME,
+                        messages: conversationHistory
+                    })
+                });
 
-function consoleRunner(code) {
-  return `<body style="font:13px monospace;background:#0b0d1c;color:#e9e7f7;margin:8px"><pre id="o" style="white-space:pre-wrap"></pre><script>
-const o=document.getElementById("o");const w=(c,a)=>{o.textContent+=(c?c+" ":"")+a.map(x=>typeof x==="object"?JSON.stringify(x):String(x)).join(" ")+"\\n"};
-console.log=(...a)=>w("",a);console.error=(...a)=>w("[error]",a);console.warn=(...a)=>w("[warn]",a);
-window.onerror=(m,s,l)=>w("[error]",[m+" (line "+l+")"]);
-<\/script><script>${code.replace(/<\/script/gi, "<\\/script")}<\/script></body>`;
-}
-const PREVIEW_SHIM = '<script>(function(){function mk(){var d={};return{getItem:function(k){return k in d?d[k]:null},setItem:function(k,v){d[k]=String(v)},removeItem:function(k){delete d[k]},clear:function(){for(var k in d)delete d[k]},key:function(i){return Object.keys(d)[i]||null},get length(){return Object.keys(d).length}}}["localStorage","sessionStorage"].forEach(function(n){try{window[n].getItem("x")}catch(e){try{Object.defineProperty(window,n,{value:mk(),configurable:true})}catch(_){}}});var s=function(m){parent.postMessage({lunai:1,m:String(m).slice(0,300)},"*")};addEventListener("error",function(e){s(e.message+" (line "+e.lineno+")")});addEventListener("unhandledrejection",function(e){s("Unhandled promise rejection: "+(e.reason&&e.reason.message||e.reason))});var ce=console.error;console.error=function(){s("console.error: "+[].join.call(arguments," "));ce.apply(console,arguments)};var cl=console.log;console.log=function(){parent.postMessage({lunai:2,m:[].join.call(arguments," ").slice(0,300)},"*");cl.apply(console,arguments)}})()<\/script>';
-function withShim(html) {
-  if (/<head[^>]*>/i.test(html)) return html.replace(/<head[^>]*>/i, m => m + PREVIEW_SHIM);
-  if (/<html[^>]*>/i.test(html)) return html.replace(/<html[^>]*>/i, m => m + PREVIEW_SHIM);
-  return PREVIEW_SHIM + html;
-}
-function renderPreview() { $("perr").hidden = true; els.preview.srcdoc = buildPreview(); }
-function buildPreview(entry) {
-  const p = entry === undefined ? state.activePath : entry, f = state.files;
-  const note = t => `<body style="font:14px system-ui;padding:24px;color:#444">${t}</body>`;
-  let html;
-  const htmlPath = /\.html?$/i.test(p) ? p : (f["index.html"] !== undefined ? "index.html" : Object.keys(f).find(k => /\.html?$/i.test(k)));
-  if (htmlPath) {
-    const dir = htmlPath.includes("/") ? htmlPath.slice(0, htmlPath.lastIndexOf("/") + 1) : "";
-    const get = src => f[normPath(dir + src)] ?? f[normPath(src)];
-    html = f[htmlPath]
-      .replace(/<link[^>]+href=["']([^"']+\.css)["'][^>]*>/gi, (m, s) => get(s) !== undefined ? `<style>${get(s)}</style>` : m)
-      .replace(/<script([^>]*)src=["']([^"']+)["']([^>]*)><\/script>/gi, (m, a, s, b) => get(s) !== undefined ? `<script${a}${b}>${get(s).replace(/<\/script/gi, "<\\/script")}<\/script>` : m);
-  } else if (/\.m?js$/i.test(p || "")) html = consoleRunner(f[p]);
-  else if (/\.svg$/i.test(p || "")) html = `<body style="margin:0;display:grid;place-items:center;height:100vh">${f[p]}</body>`;
-  else if (/\.md$/i.test(p || "")) html = `<body style="font:15px/1.6 system-ui;max-width:700px;margin:auto;padding:20px">${md(f[p])}</body>`;
-  else html = note(p ? `<b>${escapeHtml(langOf(p))}</b> can't run in the browser. Ask Luna for the exact command to run it locally, or for a web version.` : "Open a file to preview or run it.");
-  return withShim(html);
-}
+                if (!response.ok) {
+                    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+                }
 
-function workspaceSummary() {
-  const paths = Object.keys(state.files).sort();
-  let s = "PROJECT: " + curProj().name + "\nWORKSPACE FILES:\n" + (paths.length ? paths.map(p => `- ${p} (${langOf(p)}, ${state.files[p].length} chars)`).join("\n") : "(empty)");
-  if (state.activePath && state.files[state.activePath] !== undefined) {
-    const c = state.files[state.activePath];
-    s += `\n\nUSER HAS OPEN: ${state.activePath}\n` + c.slice(0, 6000) + (c.length > 6000 ? "\n…(truncated, use read_file)" : "");
-  }
-  return s;
-}
+                const data = await response.json();
+                const replyText = data.choices[0].message.content;
 
-async function runTool(name, a) {
-  const p = normPath(a.path), f = state.files;
-  try {
-    if (name === "list_files") return Object.keys(f).sort().map(k => `${k} (${f[k].length} chars)`).join("\n") || "(empty workspace)";
-    if (name === "read_file") {
-      if (!(p in f)) return `Error: ${p} not found. Files: ${Object.keys(f).join(", ") || "none"}`;
-      if (!a.start && !a.end) return f[p];
-      const L = f[p].split("\n"), st = Math.max(1, +a.start || 1), en = Math.min(L.length, +a.end || L.length);
-      return `[lines ${st}-${en} of ${L.length}]\n` + L.slice(st - 1, en).join("\n");
-    }
-    if (name === "run_code") return await runCode(p);
-    if (name === "run_tests") return await runTests();
-    if (name === "update_plan") { const t = String(a.plan || ""); if (curLive) curLive.plan = t; const L = t.split("\n").filter(l => /\[[ xX>~]\]/.test(l)); return `Plan updated: ${L.filter(l => /\[[xX]\]/.test(l)).length}/${L.length} steps done.`; }
-    if (name === "write_file") { if (!p) return "Error: path required"; f[p] = String(a.content ?? ""); if (!state.activePath || p === state.activePath) openFile(p); else renderFiles(); return `Wrote ${p} (${f[p].length} chars)`; }
-    if (name === "edit_file") {
-      if (!(p in f)) return `Error: ${p} not found`;
-      const n = f[p].split(a.find).length - 1;
-      if (!a.find || n !== 1) return `Error: 'find' text matched ${n} times; it must match exactly once. Read the file and retry with more context.`;
-      f[p] = f[p].replace(a.find, () => a.replace ?? ""); if (p === state.activePath) openFile(p); return `Edited ${p}`;
-    }
-    if (name === "rename_file") { const q = normPath(a.new_path); if (!(p in f) || !q) return "Error: invalid rename"; f[q] = f[p]; delete f[p]; if (state.activePath === p) state.activePath = q; closeEditorIfMissing(); openFile(q in f ? (state.activePath || q) : q); return `Renamed ${p} to ${q}`; }
-    if (name === "delete_file") { if (!(p in f)) return `Error: ${p} not found`; delete f[p]; closeEditorIfMissing(); renderFiles(); return `Deleted ${p}`; }
-    if (name === "search_files") { const q = String(a.query || "").toLowerCase(); if (!q) return "Error: query required"; const out = []; for (const [k, v] of Object.entries(f)) v.split("\n").forEach((l, i) => { if (out.length < 60 && l.toLowerCase().includes(q)) out.push(`${k}:${i + 1}: ${l.trim().slice(0, 160)}`); }); return out.join("\n") || "No matches"; }
-    if (name === "check_project") return await checkProject();
-    if (name === "set_theme") { const t = customTheme(a); if (!t) return "Error: bg and accent must be 6-digit hex colors"; applyTheme(t); return "Theme set" + (a.name ? " to " + a.name : ""); }
-    return "Error: unknown tool " + name;
-  } catch (e) { return "Error: " + e.message; }
-}
+                // 4. Remove loading element and save assistant message
+                removeLoadingBubble(loadingId);
+                appendMessage("assistant", replyText);
 
-const CLIKE = new Set(["js","mjs","ts","jsx","tsx","java","c","h","cpp","cc","cs","go","kt","php","dart","swift","scala","css","json"]);
-const HASHC = new Set(["py","rb","sh","bash","pl","r"]);
-const stripCode = (t, hash) => t.replace(hash ? /#[^\n]*|"""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'/g : /\/\*[\s\S]*?\*\/|\/\/[^\n]*|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|`(?:\\.|[^`\\])*`/g, m => m.replace(/[^\n]/g, " "));
-function balanceIssue(code, hash) {
-  const t = stripCode(code, hash), st = [], pair = { ")":"(", "]":"[", "}":"{" };
-  for (let i = 0; i < t.length; i++) {
-    const c = t[i];
-    if ("([{".includes(c)) st.push([c, i]);
-    else if (pair[c]) { const top = st.pop(); if (!top || top[0] !== pair[c]) return `unexpected '${c}' on line ${t.slice(0, i).split("\n").length}`; }
-  }
-  return st.length ? `unclosed '${st[st.length - 1][0]}' opened on line ${t.slice(0, st[st.length - 1][1]).split("\n").length}` : "";
-}
-function jsSyntax(code) {
-  const c = code.replace(/^\s*import[\s\S]*?from\s*["'][^"']+["'];?/gm, "").replace(/^\s*import\s*["'][^"']+["'];?/gm, "").replace(/^\s*export\s+(default\s+)?/gm, "");
-  try { new Function(c); return ""; } catch (e) { return e.message; }
-}
-function runtimeErrors(entry, logs) {
-  return new Promise(resolve => {
-    const errs = [], ifr = document.createElement("iframe");
-    ifr.sandbox = "allow-scripts"; ifr.style.cssText = "position:fixed;left:-9999px;width:800px;height:600px;border:0";
-    const hook = '<script>(function(){const s=m=>parent.postMessage({lunai:1,m:String(m).slice(0,300)},"*");addEventListener("error",e=>s(e.message+" (line "+e.lineno+")"));addEventListener("unhandledrejection",e=>s("Unhandled promise rejection: "+(e.reason&&e.reason.message||e.reason)));console.error=(...a)=>s("console.error: "+a.join(" "));})()<\/script>';
-    const on = e => { if (e.source === ifr.contentWindow && e.data && e.data.lunai) { if (e.data.lunai === 2) { if (logs) logs.push(e.data.m); } else errs.push(e.data.m); } };
-    window.addEventListener("message", on);
-    setTimeout(() => { window.removeEventListener("message", on); ifr.remove(); resolve([...new Set(errs)].slice(0, 6)); }, 1800);
-    ifr.srcdoc = buildPreview(entry);
-    document.body.appendChild(ifr);
-  });
-}
-async function checkProject() {
-  const f = state.files, paths = Object.keys(f).sort(), issues = [];
-  if (!paths.length) return "OK: the workspace is empty, nothing to check.";
-  const ext = x => (/\.([A-Za-z0-9]+)$/.exec(x) || [])[1]?.toLowerCase() || "";
-  const hasModule = c => /^\s*(import\s.+from|export\s)/m.test(c);
-  for (const x of paths) {
-    const c = f[x], e = ext(x);
-    if (!c.trim()) { issues.push(`${x}: file is empty`); continue; }
-    if (!["md", "txt"].includes(e) && /\b(TODO|FIXME)\b|rest of (the )?(code|file)|existing code|your code here|implement (this|me)\b/i.test(c)) issues.push(`${x}: contains a placeholder or TODO instead of real code`);
-    if (e === "json") { try { JSON.parse(c); } catch (er) { issues.push(`${x}: invalid JSON (${er.message})`); } continue; }
-    if (e === "js" || e === "mjs") { const m = jsSyntax(c); if (m) issues.push(`${x}: syntax error: ${m}`); }
-    if (CLIKE.has(e) || HASHC.has(e)) { const b = balanceIssue(e === "css" ? c.replace(/url\([^)]*\)/g, "") : c, HASHC.has(e)); if (b) issues.push(`${x}: bracket problem, ${b}`); }
-    if (e === "py" && /^\t+ /m.test(c)) issues.push(`${x}: mixes tabs and spaces in indentation`);
-    if (/^html?$/.test(e)) {
-      const doc = new DOMParser().parseFromString(c, "text/html"), dir = x.includes("/") ? x.slice(0, x.lastIndexOf("/") + 1) : "";
-      const local = u => u && !/^(https?:|data:|#|\/\/|mailto:|blob:)/i.test(u);
-      let js = "";
-      doc.querySelectorAll("script").forEach(sc => {
-        const src = sc.getAttribute("src");
-        if (src) { if (local(src)) { const t = f[normPath(dir + src)] ?? f[normPath(src)]; if (t === undefined) issues.push(`${x}: <script src="${src}"> but that file does not exist`); else js += "\n" + t; } }
-        else if (!sc.type || /javascript|module/.test(sc.type)) { const m = sc.type === "module" ? "" : jsSyntax(sc.textContent); if (m) issues.push(`${x}: inline script syntax error: ${m}`); js += "\n" + sc.textContent; }
-      });
-      doc.querySelectorAll("link[href]").forEach(l => { const h = l.getAttribute("href"); if (local(h) && /stylesheet/i.test(l.rel) && f[normPath(dir + h)] === undefined && f[normPath(h)] === undefined) issues.push(`${x}: stylesheet "${h}" does not exist`); });
-      const ids = new Set([...js.matchAll(/getElementById\(\s*["']([^"']+)["']\s*\)|querySelector\(\s*["']#([\w-]+)["']\s*\)/g)].map(m => m[1] || m[2]));
-      for (const id of ids) if (!doc.getElementById(id) && !js.includes(`id="${id}"`) && !js.includes(`.id = "${id}"`) && !js.includes(`id='${id}'`)) issues.push(`${x}: JavaScript looks for #${id} but no element has that id (ignore if created dynamically)`);
-    }
-  }
-  const entry = f["index.html"] !== undefined ? "index.html" : (paths.find(x => /\.html?$/i.test(x)) || paths.find(x => /\.js$/i.test(x) && !hasModule(f[x])));
-  if (entry) (await runtimeErrors(entry)).forEach(m => issues.push(`runtime error while running ${entry}: ${m}`));
-  return issues.length ? "ISSUES FOUND:\n- " + issues.join("\n- ") : `OK: ${paths.length} file(s) passed syntax, bracket, reference${entry ? " and runtime" : ""} checks.`;
-}
+            } catch (error) {
+                console.error("Chat Error:", error);
+                removeLoadingBubble(loadingId);
+                appendMessage("assistant", `⚠️ **Error connecting to LunAI:** ${error.message}. Please check your API access layout.`);
+            } finally {
+                setFormDisabled(false);
+            }
+        });
 
-const fileExt = x => ((/\.([A-Za-z0-9]+)$/.exec(x) || [])[1] || "").toLowerCase();
-const isTestFile = x => /(\.test|\.spec)\.m?js$|(^|\/)tests?\.js$|(^|\/)(test_[^/]*|[^/]*_test)\.py$/.test(x);
-const clip = (t, n) => t.length > n ? t.slice(0, n) + `\n…(truncated ${t.length - n} chars; use read_file with start and end for the rest)` : t;
-function __runner(FILES, ENTRY) {
-  const G = typeof window !== "undefined" ? window : self;
-  const post = (m, done) => { const o = { lunaiRun: 1, m, done }; if (typeof window !== "undefined") parent.postMessage(o, "*"); else postMessage(o); };
-  const fmt = a => a.map(x => { if (typeof x === "string") return x; try { return JSON.stringify(x); } catch (e) { return String(x); } }).join(" ");
-  console.log = console.info = (...a) => post(fmt(a)); console.warn = (...a) => post("[warn] " + fmt(a)); console.error = (...a) => post("[error] " + fmt(a));
-  G.addEventListener("error", e => post("[uncaught] " + e.message + " (line " + e.lineno + ")"));
-  G.addEventListener("unhandledrejection", e => post("[unhandled rejection] " + (e.reason && e.reason.message || e.reason)));
-  const cache = {}, norm = p => { const o = []; for (const s of p.split("/")) { if (s === "..") o.pop(); else if (s && s !== ".") o.push(s); } return o.join("/"); };
-  const load = (from, req) => {
-    const dir = from.includes("/") ? from.slice(0, from.lastIndexOf("/") + 1) : "", base = req.startsWith(".") ? norm(dir + req) : norm(req);
-    const hit = [base, base + ".js", base + ".json", base + "/index.js"].find(c => c in FILES);
-    if (!hit) throw new Error("Cannot find module '" + req + "' (workspace files: " + Object.keys(FILES).join(", ") + ")");
-    if (cache[hit]) return cache[hit].exports;
-    if (hit.endsWith(".json")) return JSON.parse(FILES[hit]);
-    const module = { exports: {} }; cache[hit] = module;
-    new Function("module", "exports", "require", FILES[hit]).call(module.exports, module, module.exports, r => load(hit, r));
-    return module.exports;
-  };
-  const tests = [], prefix = [], eq = (a, b) => JSON.stringify(a) === JSON.stringify(b), fail = m => { throw new Error(m); };
-  G.describe = (n, fn) => { prefix.push(n); try { fn(); } finally { prefix.pop(); } };
-  G.test = G.it = (n, fn) => tests.push({ n: prefix.concat(n).join(" > "), fn });
-  G.assert = (c, m) => { if (!c) fail(m || "assertion failed"); };
-  assert.equal = (a, b, m) => { if (a != b) fail(m || "expected " + fmt([a]) + " == " + fmt([b])); };
-  assert.strictEqual = (a, b, m) => { if (a !== b) fail(m || "expected " + fmt([a]) + " === " + fmt([b])); };
-  assert.deepEqual = assert.deepStrictEqual = (a, b, m) => { if (!eq(a, b)) fail(m || "expected " + fmt([a]) + " to deep-equal " + fmt([b])); };
-  assert.throws = fn => { try { fn(); } catch (e) { return; } fail("expected function to throw"); };
-  G.expect = v => ({
-    toBe: x => { if (v !== x) fail("expected " + fmt([v]) + " to be " + fmt([x])); },
-    toEqual: x => { if (!eq(v, x)) fail("expected " + fmt([v]) + " to equal " + fmt([x])); },
-    toBeTruthy: () => { if (!v) fail("expected " + fmt([v]) + " to be truthy"); },
-    toBeFalsy: () => { if (v) fail("expected " + fmt([v]) + " to be falsy"); },
-    toContain: x => { if (!(v && v.includes && v.includes(x))) fail("expected " + fmt([v]) + " to contain " + fmt([x])); },
-    toBeGreaterThan: x => { if (!(v > x)) fail("expected " + fmt([v]) + " > " + fmt([x])); },
-    toBeLessThan: x => { if (!(v < x)) fail("expected " + fmt([v]) + " < " + fmt([x])); },
-    toThrow: () => { try { v(); } catch (e) { return; } fail("expected function to throw"); }
-  });
-  (async () => {
-    try {
-      if (/^\s*(import\s.+from|export\s)/m.test(FILES[ENTRY])) post("[error] ES module syntax (import/export) is not supported by run_code. Use require() and module.exports, or one script.");
-      else {
-        load("", ENTRY);
-        if (tests.length) {
-          let pass = 0, bad = 0;
-          for (const t of tests) { try { await t.fn(); pass++; post("PASS " + t.n); } catch (e) { bad++; post("FAIL " + t.n + ": " + (e && e.message || e)); } }
-          post("TESTS: " + pass + " passed, " + bad + " failed");
+        // Clear History Handler
+        clearBtn.addEventListener('click', () => {
+            if (confirm("Are you sure you want to clear your conversation history?")) {
+                conversationHistory = [
+                    { role: "system", content: "You are LunAI, a helpful, intelligent AI assistant powered by Mistral AI." }
+                ];
+                localStorage.removeItem('lunai_history');
+                chatWindow.innerHTML = '';
+                showInitialGreeting();
+            }
+        });
+
+        // UTILITY FUNCTIONS
+
+        function appendMessage(role, content) {
+            // Update Array State (ignoring structural system rules for clean saving)
+            conversationHistory.push({ role, content });
+            localStorage.setItem('lunai_history', JSON.stringify(conversationHistory));
+
+            // Render to DOM
+            renderMessageBubble(role, content);
+            scrollToBottom();
         }
-        await new Promise(r => setTimeout(r, 250));
-      }
-    } catch (e) { post("[error] " + (e && e.stack ? e.stack.split("\n").slice(0, 3).join(" | ") : e)); }
-    post("", true);
-  })();
-}
-function runJS(entry) {
-  return new Promise(resolve => {
-    const f = state.files, logs = [], src = "(" + __runner.toString() + ")(" + JSON.stringify(f).replace(/</g, "\\u003c") + "," + JSON.stringify(entry) + ")";
-    const usesDom = Object.values(f).some(c => /\b(document|window|alert|localStorage|sessionStorage|navigator|requestAnimationFrame)\b/.test(c));
-    let end = () => {}, done = false, timer;
-    const finish = () => { if (done) return; done = true; clearTimeout(timer); end(); resolve(logs.slice(0, 80).join("\n") || "(no output)"); };
-    timer = setTimeout(() => { logs.push("[timed out after 8s: possible infinite loop]"); finish(); }, 8000);
-    const handle = d => { if (!d || !d.lunaiRun) return; if (d.done) finish(); else logs.push(d.m); };
-    if (!usesDom && window.Worker) {
-      const url = URL.createObjectURL(new Blob([src], { type: "text/javascript" })), w = new Worker(url);
-      w.onmessage = e => handle(e.data); w.onerror = e => { logs.push("[error] " + e.message); finish(); };
-      end = () => { w.terminate(); URL.revokeObjectURL(url); };
-    } else {
-      const ifr = document.createElement("iframe"); ifr.sandbox = "allow-scripts"; ifr.style.cssText = "position:fixed;left:-9999px;width:10px;height:10px;border:0";
-      const on = e => { if (e.source === ifr.contentWindow) handle(e.data); };
-      window.addEventListener("message", on);
-      end = () => { window.removeEventListener("message", on); ifr.remove(); };
-      ifr.srcdoc = "<script>" + src + "<\/script>"; document.body.appendChild(ifr);
-    }
-  });
-}
-let pyReady = null;
-function loadPy() {
-  if (pyReady) return pyReady;
-  pyReady = new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "https://cdn.jsdelivr.net/pyodide/v0.26.4/full/pyodide.js"; sc.onload = () => loadPyodide().then(res, rej); sc.onerror = () => { pyReady = null; rej(new Error("Could not download the Python runtime (it needs an internet connection).")); }; document.head.appendChild(sc); });
-  return pyReady;
-}
-async function runPython(path) {
-  let py; try { setStatus("Loading Python (first run only)…"); py = await loadPy(); } catch (e) { return "Error: " + e.message; }
-  const out = [];
-  py.setStdout({ batched: t => out.push(t) }); py.setStderr({ batched: t => out.push("[stderr] " + t) }); py.setStdin({ stdin: () => null });
-  py.runPython('import shutil,sys\nshutil.rmtree("/work",ignore_errors=True)\nfor k in [k for k,m in sys.modules.items() if (getattr(m,"__file__",None) or "").startswith("/work/")]: del sys.modules[k]');
-  py.FS.mkdirTree("/work");
-  for (const [k, v] of Object.entries(state.files)) { const full = "/work/" + k; try { py.FS.mkdirTree(full.slice(0, full.lastIndexOf("/"))); } catch (e) {} py.FS.writeFile(full, v); }
-  const target = JSON.stringify("/work/" + path);
-  const code = /(^|\/)(test_[^/]*|[^/]*_test)\.py$/.test(path)
-    ? `import os,sys,unittest,importlib.util\nos.chdir("/work");sys.path.insert(0,"/work")\nspec=importlib.util.spec_from_file_location("t_mod",${target})\nm=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)\nr=unittest.TextTestRunner(stream=sys.stdout,verbosity=2).run(unittest.defaultTestLoader.loadTestsFromModule(m))\nprint("TESTS:",r.testsRun-len(r.failures)-len(r.errors),"passed,",len(r.failures)+len(r.errors),"failed")`
-    : `import os,sys,runpy\nos.chdir("/work");sys.path.insert(0,"/work")\nrunpy.run_path(${target},run_name="__main__")`;
-  try { await py.runPythonAsync(code); } catch (e) { out.push("[error] " + String(e.message || e).split("\n").slice(-6).join("\n")); }
-  return out.join("\n") || "(no output)";
-}
-async function runCode(path) {
-  if (!(path in state.files)) return `Error: ${path} not found. Files: ${Object.keys(state.files).join(", ") || "none"}`;
-  const e = fileExt(path);
-  if (e === "js" || e === "mjs") return await runJS(path);
-  if (e === "html" || e === "htm") { const logs = [], errs = await runtimeErrors(path, logs); return (logs.length ? "Console:\n" + logs.slice(0, 40).join("\n") + "\n" : "") + (errs.length ? "[error] Runtime errors:\n- " + errs.join("\n- ") : "No runtime errors in the first 2 seconds."); }
-  if (e === "py") return await runPython(path);
-  return `Error: .${e || "this"} files can't run in the browser (only JavaScript, HTML and Python do). Re-read the code carefully and use check_project; tell the user the command to run it locally.`;
-}
-async function runTests() {
-  const files = Object.keys(state.files).filter(isTestFile).sort();
-  if (!files.length) return "No test files found. Write tests first (JavaScript: name.test.js using test, expect, assert; Python: test_name.py using unittest), then call run_tests.";
-  let ok = true; const lines = [];
-  for (const x of files) { const r = await runCode(x); lines.push("== " + x + " ==\n" + r); if (!/TESTS: \d+ passed, 0 failed/.test(r) || /\[(error|uncaught|unhandled)/.test(r)) ok = false; }
-  return (ok ? "PASS\n" : "FAIL\n") + lines.join("\n");
-}
-async function verifyProject() {
-  const rep = await checkProject();
-  if (!rep.startsWith("OK")) return rep;
-  if (Object.keys(state.files).some(isTestFile)) { const t = await runTests(); if (!t.startsWith("PASS")) return "TEST FAILURES:\n" + t; }
-  return rep;
-}
-function compactHistory(msgs) {
-  const tools = msgs.map((m, i) => m.role === "tool" ? i : -1).filter(i => i >= 0), from = tools.length > 6 ? tools[tools.length - 6] : 0;
-  msgs.forEach((m, i) => { if (i < from && m.role === "tool" && m.content.length > 400) m.content = m.content.slice(0, 300) + "\n…(older output trimmed)"; });
-}
-const planOpen = t => String(t || "").split("\n").filter(l => /\[[ >~]\]/.test(l)).map(l => l.trim());
-function planHtml(t) {
-  const rows = String(t).split("\n").map(l => /^\s*[-*]?\s*\[([ xX>~])\]\s*(.*)$/.exec(l)).filter(Boolean).map(m => { const c = m[1].toLowerCase(); return `<div class="${c === "x" ? "d" : c === " " ? "" : "p"}">${c === "x" ? "☑" : c === " " ? "☐" : "▸"} ${escapeHtml(m[2])}</div>`; });
-  return rows.length ? `<div class="plan">${rows.join("")}</div>` : "";
-}
-const lastPlanText = () => { const lp = [...state.messages].reverse().find(m => m.role === "assistant" && m.plan); return lp ? "\n\nPLAN FROM EARLIER IN THIS CHAT (update it if the new request changes things):\n" + lp.plan : ""; };
-async function runAgent(live, apiMessages, content) {
-  const MAX_STEPS = 40, last = {}, reps = {}, note = h => live.toolNotes.push(h);
-  let wrote = false, verified = false, nudges = 0, vRounds = 0, planNags = 0, step = 0;
-  for (; step < MAX_STEPS; step++) {
-    if (stopped) throw Object.assign(new Error("stopped"), { name: "AbortError" });
-    setStatus(`Step ${step + 1}: thinking…`);
-    compactHistory(apiMessages);
-    const { text: out, toolCalls } = await streamWithFailover(apiMessages, partial => { live.content = partial; renderChat(); }, live);
-    live.content = out;
-    if (!toolCalls.length) {
-      if (!wrote) {
-        const got = applyFileBlocks(out);
-        if (got.names.length) { wrote = true; verified = false; live.content = got.text.trim(); note("✓ <b>wrote</b> " + escapeHtml(got.names.join(", "))); }
-        else if (nudges < 1 && BUILD_RE.test(content)) { nudges++; apiMessages.push({ role: "assistant", content: out || "(no reply)" }, { role: "user", content: NUDGE }); live.content = ""; renderChat(); continue; }
-      }
-      const open = planOpen(live.plan);
-      if (open.length && planNags < 2) { planNags++; apiMessages.push({ role: "assistant", content: out || "(continuing)" }, { role: "user", content: "Your plan still has open steps:\n" + open.join("\n") + "\nKeep working through them with tools. If a step is no longer needed, call update_plan to mark it done or remove it. Do not stop until the plan is complete and verified." }); live.content = ""; renderChat(); continue; }
-      if (wrote && !verified && vRounds < 3) {
-        vRounds++; setStatus("Verifying (checks and tests)…");
-        const rep = await verifyProject(), ok = rep.startsWith("OK");
-        note(`${ok ? "✓" : "✗"} <b>verify</b> <span class="dim">${escapeHtml(rep.split("\n")[0].slice(0, 90))}</span>`);
-        if (ok) { verified = true; break; }
-        apiMessages.push({ role: "assistant", content: out || "(done)" }, { role: "user", content: "Automatic verification failed:\n" + clip(rep, 3000) + "\nDiagnose the root cause, fix it, and re-run until it passes. Then give a short summary." });
-        live.content = ""; renderChat(); continue;
-      }
-      break;
-    }
-    apiMessages.push({ role: "assistant", content: out || "", tool_calls: toolCalls });
-    if (out.trim()) { note("💭 " + escapeHtml(out.trim().replace(/\s+/g, " ").slice(0, 220))); live.content = ""; }
-    for (const tc of toolCalls) {
-      const args = safeJSON(tc.function.arguments), name = tc.function.name;
-      setStatus(`Step ${step + 1}: ${name} ${args.path || ""}`);
-      let result; try { result = await runTool(name, args); } catch (e) { result = "Error: " + e.message; }
-      result = clip(String(result), name === "read_file" ? 14000 : 6000);
-      if (/^(write_file|edit_file|rename_file|delete_file)$/.test(name) && !/^Error/.test(result)) { wrote = true; verified = false; }
-      const key = name + JSON.stringify(args);
-      reps[key] = last[key] === result ? (reps[key] || 0) + 1 : 0; last[key] = result;
-      if (reps[key] >= 2) result += "\n[Agent note: this exact action has now returned the same result 3 times. Stop repeating it. Re-read the relevant code and try a different approach.]";
-      const bad = /^(Error|ISSUES FOUND|FAIL|TEST FAILURES)|\[(error|uncaught|unhandled)/.test(result);
-      note(`${bad ? "✗" : "✓"} <b>${escapeHtml(name)}</b> ${escapeHtml(args.path || args.query || "")} <span class="dim">${escapeHtml(result.split("\n")[0].slice(0, 90))}</span>`);
-      apiMessages.push({ role: "tool", tool_call_id: tc.id, name, content: result });
-    }
-    renderChat();
-  }
-  if (step >= MAX_STEPS) live.content = (live.content ? live.content + "\n\n" : "") + "I reached my 40-step limit. Say \"continue\" and I'll pick up from the plan.";
-  if (!live.content.trim()) live.content = wrote ? (verified ? "Done. I made the changes and verified them. See the steps above." : "Finished, but verification did not fully pass. See the steps above.") : "Done.";
-}
 
-const safeJSON = t => { try { return JSON.parse(t || "{}"); } catch { return {}; } };
-function toGemini(messages) {
-  let system = ""; const contents = [];
-  for (const m of messages) {
-    if (m.role === "system") { system = m.content; continue; }
-    if (m.role === "user") { const parts = Array.isArray(m.content) ? m.content.map(c => { if (c.type === "text") return { text:c.text }; const mm = /^data:([^;]+);base64,(.*)$/.exec(c.image_url.url); return { inlineData:{ mimeType:mm[1], data:mm[2] } }; }) : [{ text:m.content || " " }]; contents.push({ role:"user", parts }); continue; }
-    if (m.role === "assistant") {
-      const parts = [];
-      if (m.content) parts.push({ text:m.content });
-      for (const c of m.tool_calls || []) parts.push(c._part || { functionCall:{ name:c.function.name, args:safeJSON(c.function.arguments) } });
-      if (parts.length) contents.push({ role:"model", parts });
-      continue;
-    }
-    if (m.role === "tool") {
-      const part = { functionResponse:{ name:m.name, response:{ result:m.content } } };
-      const last = contents[contents.length - 1];
-      if (last && last._tool) last.parts.push(part); else contents.push({ role:"user", parts:[part], _tool:true });
-    }
-  }
-  contents.forEach(c => delete c._tool);
-  return { system, contents };
-}
-function geminiTools() {
-  return [{ functionDeclarations: TOOLS.map(t => {
-    const f = t.function, props = f.parameters.properties, d = { name:f.name, description:f.description };
-    if (Object.keys(props).length) d.parameters = { type:"OBJECT", properties:Object.fromEntries(Object.entries(props).map(([k, v]) => [k, { type:v.type.toUpperCase() }])), required:f.parameters.required.length ? f.parameters.required : undefined };
-    return d;
-  }) }];
-}
-async function streamGemini(messages, onText, m) {
-  abort = newAbort(90000);
-  const { system, contents } = toGemini(messages);
-  const res = await fetch(m.url, {
-    method: "POST", signal: abort.signal, headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ systemInstruction:{ parts:[{ text:system }] }, contents, tools:geminiTools(), generationConfig:{ temperature:0.4, maxOutputTokens:8192 } })
-  });
-  clearTimeout(abort.timer);
-  if (!res.ok) throw new Error("Proxy error (" + res.status + "): " + (await res.text()).slice(0, 300));
-  const data = await res.json();
-  if (data.error) throw new Error("Google API error: " + (data.error.message || "unknown"));
-  const parts = (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-  const toolCalls = parts.filter(p => p.functionCall).map((p, i) => ({ id:Math.random().toString(36).slice(2, 10) + i, type:"function", function:{ name:p.functionCall.name, arguments:JSON.stringify(p.functionCall.args || {}) }, _part:p }));
-  let text = parts.filter(p => p.text && !p.thought).map(p => p.text).join("");
-  if (!text && !toolCalls.length) text = "(no response)";
-  if (text) onText(text);
-  return { text, toolCalls };
-}
-function newAbort(ms) { const c = new AbortController(); c.timer = setTimeout(() => { c.timedOut = true; c.abort(); }, ms); return c; }
-const BUILD_RE = /\b(make|build|create|write|generate|clone|develop|implement|code|fix|add|design|program)\b/i;
-const NUDGE = "You DO have working tools in this workspace. Do not explain, ask permission or say you cannot. Build it now: call write_file for every file (for a web app: index.html plus any css/js), then call check_project. If you truly cannot call tools, reply with each file in a fenced code block with the file path on the line directly above the fence.";
-function applyFileBlocks(text) {
-  const names = [], put = (path, body) => { const k = normPath(path); state.files[k] = body; names.push(k); return "\n(wrote " + k + ")"; };
-  let rest = String(text || "");
-  rest = rest.replace(/(?:^|\n)[ \t]*(?:#{1,6}[ \t]*|\*\*|`|(?:file|filename|path)[ \t]*:[ \t]*)?(\w[\w./-]*\.[A-Za-z0-9]{1,8})[`*:]*\**[ \t]*\n[ \t]*```[\w+#.-]*[ \t]*\n([\s\S]*?)\n[ \t]*```/g, (m, path, body) => put(path, body));
-  rest = rest.replace(/```[\w+#.-]*[ \t:]+(\w[\w./-]*\.[A-Za-z0-9]{1,8})[ \t]*\n([\s\S]*?)\n[ \t]*```/g, (m, path, body) => put(path, body));
-  if (names.length) { renderFiles(); openFile(names[0]); }
-  return { names, text: rest };
-}
-async function streamWithFailover(messages, onText, live) {
-  const first = state.modelIdx, order = [first, ...MODELS.map((_, i) => i).filter(i => i !== first)];
-  let lastErr, prev = null;
-  for (const idx of order) {
-    state.modelIdx = idx;
-    try {
-      const r = await streamOnce(messages, onText);
-      if (idx !== first) { els.modelSel.value = idx; save(); setStatus("Switched to " + MODELS[idx].name); live.toolNotes.push(`switched to <b>${escapeHtml(MODELS[idx].name)}</b>, same chat and plan`); }
-      return r;
-    } catch (err) {
-      clearTimeout(abort && abort.timer);
-      if (err.name === "AbortError" && !(abort && abort.timedOut)) throw err;
-      lastErr = err.name === "AbortError" ? new Error("no response from " + MODELS[idx].name) : err;
-      const next = order[order.indexOf(idx) + 1];
-      if (next !== undefined) setStatus(MODELS[idx].name + " isn't responding, trying " + MODELS[next].name + "…");
-    }
-  }
-  state.modelIdx = first;
-  throw new Error("Every model failed. Last error: " + lastErr.message);
-}
-function streamOnce(messages, onText) {
-  const m = MODELS[state.modelIdx];
-  return m.type === "gemini" ? streamGemini(messages, onText, m) : streamMistral(messages, onText, m);
-}
-async function streamMistral(messages, onText, m) {
-  abort = newAbort(25000);
-  const res = await fetch(m.url, {
-    method: "POST", signal: abort.signal,
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + m.key },
-    body: JSON.stringify({ model: visionTurn ? "ministral-8b-latest" : m.id, messages: messages.map(x => x.tool_calls ? { ...x, tool_calls: x.tool_calls.map(({ _part, ...c }) => c) } : x), tools: TOOLS, tool_choice: "auto", stream: true })
-  });
-  clearTimeout(abort.timer);
-  if (!res.ok) throw new Error(res.status + " " + (await res.text()).slice(0, 300));
-  const reader = res.body.getReader(), dec = new TextDecoder();
-  let buf = "", text = ""; const calls = [];
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buf += dec.decode(value, { stream: true });
-    const lines = buf.split("\n"); buf = lines.pop();
-    for (const l of lines) {
-      if (!l.startsWith("data:")) continue;
-      const d = l.slice(5).trim(); if (!d || d === "[DONE]") continue;
-      let j; try { j = JSON.parse(d); } catch { continue; }
-      const delta = j.choices && j.choices[0] && j.choices[0].delta; if (!delta) continue;
-      if (typeof delta.content === "string") { text += delta.content; onText(text); }
-      for (const t of delta.tool_calls || []) {
-        const i = t.index ?? calls.length;
-        calls[i] = calls[i] || { id: "", type: "function", function: { name: "", arguments: "" } };
-        if (t.id) calls[i].id = t.id;
-        if (t.function && t.function.name) calls[i].function.name += t.function.name;
-        if (t.function && t.function.arguments) calls[i].function.arguments += typeof t.function.arguments === "string" ? t.function.arguments : JSON.stringify(t.function.arguments);
-      }
-    }
-  }
-  const out = calls.filter(Boolean);
-  out.forEach((c, i) => { if (!c.id) c.id = (Math.random().toString(36).slice(2) + "000000000").slice(0, 9); });
-  return { text, toolCalls: out };
-}
+        function renderMessageBubble(role, content) {
+            if (role === 'system') return; // Hide standard background system prompt
 
-async function send(text) {
-  let content = (text || els.prompt.value).trim();
-  if ((!content && !pending.length) || busy) return;
-  const atts = pending.splice(0); renderPending();
-  const imgs = atts.filter(a => a.type === "image"), tfiles = atts.filter(a => a.type === "text");
-  for (const t of tfiles) state.files[t.name] = t.text;
-  if (tfiles.length) { renderFiles(); if (!state.activePath) openFile(tfiles[0].name); }
-  if (!content) content = imgs.length ? "Here is an image." : "I attached files.";
-  if (tfiles.length) content += "\n\n[Attached and added to the workspace: " + tfiles.map(t => t.name).join(", ") + "]";
-  if (imgs.length) content += "\n\n[Attached image(s): " + imgs.map(i => i.name).join(", ") + "]";
-  busy = true; els.prompt.value = ""; els.prompt.style.height = "auto";
-  els.send.disabled = true; els.stop.hidden = false; setStatus("Luna is thinking…");
-  snapshot = JSON.stringify(state.files);
-  const th = detectTheme(content); if (th && th !== state.theme) { applyTheme(th); setStatus("Theme: " + th); }
-  state.messages.push({ role: "user", content, attach: atts.map(a => a.name), imgs: imgs.map(i => i.url) });
-  { const pr = curProj(); if (pr.auto && state.messages.filter(m => m.role === "user").length === 1) { let t = content.split("\n")[0].replace(/^(please\s+)?(can you\s+)?(make|build|create|write|generate)\s+(me\s+)?(an?\s+|the\s+)?/i, "").trim(); t = t.charAt(0).toUpperCase() + t.slice(1); pr.name = t.length > 28 ? t.slice(0, 28).trim() + "…" : (t || pr.name); pr.auto = false; renderProjects(); } }
-  const live = { role: "assistant", content: "", toolNotes: [] };
-  state.messages.push(live); renderChat();
-  const history = state.messages.filter(m => m !== live && (m.role === "user" || (m.role === "assistant" && m.content))).slice(-30).map(m => ({ role: m.role, content: m.content }));
-  const apiMessages = [{ role: "system", content: SYSTEM + "\n\n" + workspaceSummary() + lastPlanText() }, ...history];
-  visionTurn = imgs.length > 0;
-  if (visionTurn) { const last = apiMessages[apiMessages.length - 1]; last.content = [{ type:"text", text:last.content }, ...imgs.map(i => ({ type:"image_url", image_url:{ url:i.url } }))]; }
-  curLive = live; stopped = false;
-  try {
-    await runAgent(live, apiMessages, content);
-    save(); setStatus("");
-  } catch (err) {
-    if (err.name === "AbortError") { live.content = (live.content ? live.content + "\n\n" : "") + "_Stopped._"; setStatus("Stopped"); }
-    else { live.content = live.content || ("I couldn't reach the model.\n\n" + String(err.message || err)); setStatus("Request failed", true); }
-    save();
-  } finally {
-    busy = false; abort = null; els.send.disabled = false; els.stop.hidden = true;
-    renderChat(); renderFiles();
-    const built = snapshot !== JSON.stringify(state.files) && Object.keys(state.files).some(k => /\.(html?|m?js)$/i.test(k));
-    if (built && !isMobile()) showView("previewView");
-    else if (built) setStatus("Built. Tap ▶ Run to try it.");
-    else if ($("previewView").classList.contains("on")) renderPreview();
-  }
-}
+            const isUser = role === 'user';
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex ${isUser ? 'justify-end' : 'justify-start'}`;
 
-els.send.onclick = () => send();
-els.stop.onclick = () => { stopped = true; abort && abort.abort(); };
-els.prompt.addEventListener("keydown", e => { if ((e.ctrlKey || e.metaKey || !e.shiftKey) && e.key === "Enter") { e.preventDefault(); send(); } });
-els.prompt.addEventListener("input", () => { els.prompt.style.height = "auto"; els.prompt.style.height = Math.min(els.prompt.scrollHeight, 180) + "px"; });
-$("newChat").onclick = () => { if (busy) return; state.messages = []; snapshot = null; save(); renderChat(); };
-$("newFile").onclick = () => {
-  const p = normPath(prompt("File path (any language, e.g. src/main.rs, app.py, index.html)", "index.html"));
-  if (!p) return;
-  if (!(p in state.files)) state.files[p] = "";
-  openFile(p); els.code.focus();
-};
-$("download").onclick = () => {
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(new Blob([JSON.stringify(state.files, null, 2)], { type: "application/json" }));
-  a.download = curProj().name.replace(/[^\w-]+/g, "-") + ".json"; a.click(); URL.revokeObjectURL(a.href);
-};
-els.undo.onclick = () => { if (snapshot) { state.files = JSON.parse(snapshot); snapshot = null; closeEditorIfMissing(); if (state.activePath) openFile(state.activePath); renderFiles(); renderChat(); save(); setStatus("AI edits undone"); } };
-els.files.addEventListener("click", e => {
-  const del = e.target.closest("[data-del]");
-  if (del) { if (confirm("Delete " + del.dataset.del + "?")) { delete state.files[del.dataset.del]; closeEditorIfMissing(); renderFiles(); save(); } return; }
-  const b = e.target.closest("[data-path]"); if (b) { openFile(b.dataset.path); if (isMobile()) setMobile("code"); }
-});
-els.chips.addEventListener("click", e => { const c = e.target.closest(".chip"); if (c) send(c.textContent); });
-document.querySelectorAll(".tab").forEach(t => t.onclick = () => showView(t.dataset.view));
-els.code.addEventListener("input", () => {
-  if (!state.activePath) return;
-  state.files[state.activePath] = els.code.value;
-  clearTimeout(saveTimer); saveTimer = setTimeout(save, 250);
-});
-els.code.addEventListener("keydown", e => {
-  if (e.key === "Tab") { e.preventDefault(); const s = els.code.selectionStart; els.code.setRangeText("  ", s, els.code.selectionEnd, "end"); els.code.dispatchEvent(new Event("input")); }
-});
-els.modelSel.innerHTML = MODELS.map((m, i) => `<option value="${i}">${escapeHtml(m.name)}</option>`).join("");
-els.modelSel.value = state.modelIdx;
-els.modelSel.onchange = () => { state.modelIdx = +els.modelSel.value; save(); setStatus("Model: " + MODELS[state.modelIdx].name); };
+            // Map Markdown content into HTML using marked.js
+            const renderedContent = isUser ? escapeHTML(content) : marked.parse(content);
 
-const pending = [];
-const fileIn = $("fileIn");
-function renderPending() { $("pending").innerHTML = pending.map((a, i) => `<span class="att">${a.type === "image" ? `<img src="${a.url}" alt="">` : ""}${escapeHtml(a.name)}<button data-rm="${i}" aria-label="Remove ${escapeHtml(a.name)}">×</button></span>`).join(""); }
-function downscale(file) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 1280 / Math.max(im.width, im.height)), c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL("image/jpeg", .85)); }; im.onerror = rej; im.src = r.result; }; r.onerror = rej; r.readAsDataURL(file); }); }
-async function addFiles(list) {
-  for (const file of [...list]) {
-    if (pending.length >= 6) { setStatus("Up to 6 attachments per message", true); break; }
-    try {
-      if (file.type.startsWith("image/")) pending.push({ type:"image", name:file.name || "pasted-image.png", url:await downscale(file) });
-      else {
-        if (file.size > 300000) { setStatus(file.name + " is over 300 KB", true); continue; }
-        const t = await file.text();
-        if (t.includes("\u0000")) { setStatus(file.name + " looks binary, so I can't read it", true); continue; }
-        pending.push({ type:"text", name:normPath(file.name), text:t });
-      }
-    } catch { setStatus("Couldn't read " + file.name, true); }
-  }
-  renderPending();
-}
-$("attach").onclick = () => fileIn.click();
-fileIn.onchange = () => { addFiles(fileIn.files); fileIn.value = ""; };
-$("pending").addEventListener("click", e => { const b = e.target.closest("[data-rm]"); if (b) { pending.splice(+b.dataset.rm, 1); renderPending(); } });
-els.prompt.addEventListener("paste", e => { const fs = [...((e.clipboardData && e.clipboardData.files) || [])]; if (fs.length) { e.preventDefault(); addFiles(fs); } });
-["dragover", "drop"].forEach(ev => $("chatPane").addEventListener(ev, e => { e.preventDefault(); if (ev === "drop") addFiles(e.dataTransfer.files); }));
+            wrapper.innerHTML = `
+                <div class="max-w-[75%] rounded-2xl px-4 py-2.5 shadow-sm prose ${
+                    isUser 
+                    ? 'bg-indigo-600 text-white rounded-br-none' 
+                    : 'bg-white text-gray-800 rounded-bl-none border border-gray-200'
+                }">
+                    <div class="text-xs font-semibold mb-1 opacity-75">${isUser ? 'You' : 'LunAI'}</div>
+                    <div class="text-sm break-words leading-relaxed">${renderedContent}</div>
+                </div>
+            `;
+            chatWindow.appendChild(wrapper);
+        }
 
-const isMobile = () => matchMedia("(max-width:900px)").matches;
-const mainEl = document.querySelector("main"); mainEl.dataset.m = "chat";
-function setMobile(m) { mainEl.dataset.m = m; document.querySelectorAll("#mnav button").forEach(b => b.classList.toggle("on", b.dataset.m === m)); if (m === "code") showView("codeView"); if (m === "run") showView("previewView"); }
-document.querySelectorAll("#mnav button").forEach(b => b.onclick = () => setMobile(b.dataset.m));
-let lastErr = "";
-window.addEventListener("message", e => { if (e.source === els.preview.contentWindow && e.data && e.data.lunai === 1) { lastErr = e.data.m; $("perrmsg").textContent = "⚠ " + lastErr; $("perr").hidden = false; } });
-$("fixerr").onclick = () => { $("perr").hidden = true; send("The preview shows this error. Please fix it, then check again: " + lastErr); if (isMobile()) setMobile("chat"); };
-$("reload").onclick = () => renderPreview();
-$("full").onclick = () => { const u = URL.createObjectURL(new Blob([buildPreview()], { type: "text/html" })); window.open(u, "_blank"); };
-$("welcome").addEventListener("click", e => { const b = e.target.closest("[data-send]"); if (b) { send(b.dataset.send); if (isMobile()) setMobile("chat"); } });
-const curProj = () => state.projects.find(x => x.id === state.currentId);
-function renderProjects() { $("projSel").innerHTML = state.projects.map(p => `<option value="${p.id}">${escapeHtml(p.name)}</option>`).join(""); $("projSel").value = state.currentId; }
-function loadProject(p) {
-  state.currentId = p.id; state.files = p.files; state.messages = p.messages; state.activePath = p.activePath || ""; snapshot = null; pending.length = 0; renderPending();
-  if (!state.files[state.activePath]) state.activePath = Object.keys(state.files).sort()[0] || "";
-  if (state.activePath) openFile(state.activePath); else { els.code.value = ""; els.pathbar.textContent = "No file open"; els.lang.textContent = ""; }
-  renderProjects(); renderFiles(); renderChat(); save();
-  if ($("previewView").classList.contains("on")) renderPreview();
-}
-function switchProject(id) {
-  const p = state.projects.find(x => x.id === id);
-  if (busy) { setStatus("Wait for Luna to finish first", true); renderProjects(); return; }
-  if (!p || id === state.currentId) return;
-  syncCurrent(); loadProject(p);
-}
-function newProject() {
-  if (busy) { setStatus("Wait for Luna to finish first", true); return; }
-  syncCurrent(); const p = { id: uid(), name: "New project", auto: true, files: {}, messages: [], activePath: "" };
-  state.projects.push(p); loadProject(p); showView("codeView"); els.prompt.focus();
-}
-function renameProject() { const p = curProj(), n = prompt("Project name", p.name); if (n && n.trim()) { p.name = n.trim().slice(0, 60); p.auto = false; renderProjects(); save(); } }
-function deleteProject() {
-  if (busy) return; const p = curProj();
-  if (!confirm(`Delete "${p.name}" with all its files and chat? This can't be undone.`)) return;
-  const i = state.projects.indexOf(p); state.projects.splice(i, 1);
-  if (!state.projects.length) state.projects.push({ id: uid(), name: "New project", auto: true, files: {}, messages: [], activePath: "" });
-  loadProject(state.projects[Math.min(i, state.projects.length - 1)]);
-}
-$("projSel").onchange = () => switchProject($("projSel").value);
-$("projNew").onclick = newProject; $("projRename").onclick = renameProject; $("projDel").onclick = deleteProject;
+        function appendLoadingBubble() {
+            const id = 'loading-' + Date.now();
+            const wrapper = document.createElement('div');
+            wrapper.id = id;
+            wrapper.className = 'flex justify-start';
+            wrapper.innerHTML = `
+                <div class="max-w-[75%] rounded-2xl px-4 py-2.5 bg-white text-gray-500 rounded-bl-none border border-gray-200 shadow-sm">
+                    <div class="text-xs font-semibold mb-1 opacity-75">LunAI</div>
+                    <div class="flex items-center gap-1 py-1">
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                        <span class="w-2 h-2 bg-gray-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                    </div>
+                </div>
+            `;
+            chatWindow.appendChild(wrapper);
+            scrollToBottom();
+            return id;
+        }
 
-if (state.activePath && state.files[state.activePath] !== undefined) openFile(state.activePath);
-applyTheme(state.theme && (typeof state.theme === "string" ? THEMES[state.theme] : state.theme) ? state.theme : "moon");
-renderProjects();
-renderFiles(); renderChat();
-</script>
-</body>
-</html>
+        function removeLoadingBubble(id) {
+            const element = document.getElementById(id);
+            if (element) element.remove();
+        }
+
+        function renderHistory() {
+            chatWindow.innerHTML = '';
+            // If history only contains system instructions, seed a visible default welcome item
+            if (conversationHistory.length <= 1) {
+                showInitialGreeting();
+            } else {
+                conversationHistory.forEach(msg => {
+                    renderMessageBubble(msg.role, msg.content);
+                });
+            }
+            scrollToBottom();
+        }
+
+        function showInitialGreeting() {
+            renderMessageBubble("assistant", "Hello! I am **LunAI**. How can I help you today? Feel free to ask code, text formulas, or lists; I support standard Markdown.");
+        }
+
+        function setFormDisabled(disabled) {
+            userInput.disabled = disabled;
+            sendBtn.disabled = disabled;
+            if(disabled) {
+                sendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                sendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                userInput.focus();
+            }
+        }
+
+        function scrollToBottom() {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+    </script>
